@@ -80,7 +80,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759169862180</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="HE CAMBIADO UN PAR DE COSILLAS PARA AJUSTAR LA BUSQUEDA EXHAUSTIVA">
+      <option name="closed" value="true" />
+      <created>1759169896136</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1759169896136</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
