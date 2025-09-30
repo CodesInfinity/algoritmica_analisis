@@ -26,12 +26,23 @@ public class main {
 	            // 2. Ejecutar el algoritmo exhaustivo
 	            ParDePuntos resultado = Algoritmos.algoritmo_exhaustivo(puntos);
 
+                //2.1 EJECUTAR EL ALGORITMO DE BUSQUEDA CON PODA
+               ParDePuntos resultado2 = Algoritmos.algoritmo_busqueda_poda(puntos) ;
+
 	            // 3. Mostrar el resultado
 	            System.out.println("\n🔎 Resultado búsqueda exhaustiva:");
 	            System.out.println("Par más cercano: " + resultado);
                System.out.println("Distancia del par mas cercano: " + resultado.getDistancia());
                System.out.println("TIEMPO DE EJECUCION: " + resultado.getTiempo_de_ejecucion() + " ms");
                System.out.println("NUMERO DE DISTANCIAS CALCULADAS: " + resultado.getNum_distancias_calculadas()) ;
+
+
+
+               System.out.println("\n🔎 Resultado búsqueda con poda:");
+               System.out.println("Par más cercano: " + resultado2);
+               System.out.println("Distancia del par mas cercano: " + resultado2.getDistancia());
+               System.out.println("TIEMPO DE EJECUCION: " + resultado2.getTiempo_de_ejecucion() + " ms");
+               System.out.println("NUMERO DE DISTANCIAS CALCULADAS: " + resultado2.getNum_distancias_calculadas()) ;
 
 			   
 			   System.out.println("\nDirectorio de trabajo actual: " + System.getProperty("user.dir"));
