@@ -37,3 +37,60 @@ El objetivo es analizar su **eficiencia teórica** y **rendimiento práctico** m
 
 ## 📂 Estructura del Proyecto  
 
+---
+
+## 🖥️ Ejemplo de salida en consola  
+
+```txt
+ch130.tsp
+Estrategia        Punto1                     Punto2                     distancia   calculadas   tiempo(mseg)
+Exhaustivo        12 (252.749, 535.743)      87 (252.429, 535.166)      0.66018099     8385        0.1729
+ExhaustivoPoda    87 (252.429, 535.166)      12 (252.749, 535.743)      0.66018099       48        0.0301
+DivideVenceras    87 (252.429, 535.166)      12 (252.749, 535.743)      0.66018099      290        0.0402
+DyV Mejorado      87 (252.429, 535.166)      12 (252.749, 535.743)      0.66018099      160        0.0586
+```
+🚀 Ejecución
+1. Compilar el proyecto
+javac src/*.java -d bin
+
+2. Ejecutar el programa
+java -cp bin Main
+
+3. Opciones disponibles
+
+Crear dataset aleatorio
+
+Cargar dataset existente
+
+Probar las 4 estrategias
+
+Comparar todas las estrategias
+
+Comparar 2 estrategias
+
+🔧 Requisitos Técnicos
+
+Lenguaje: Java 17+
+
+Ordenación: Implementación propia de HeapSort o QuickSort
+
+Bibliotecas opcionales:
+
+Para gráficas: JFreeChart
+, JMathPlot
+
+📖 Documentación
+
+En la carpeta docs/ se incluye:
+
+Estudio teórico (pseudocódigo, análisis de complejidad).
+
+Ejemplos de mejor y peor caso.
+
+Comparación experimental con tablas y gráficas.
+
+Conclusiones sobre eficiencia de cada estrategia.
+
+📝 Licencia
+
+Este proyecto se desarrolla con fines académicos en el marco de la asignatura Algorítmica y Modelos de Computación (Universidad de Huelva, curso 2025-26).
