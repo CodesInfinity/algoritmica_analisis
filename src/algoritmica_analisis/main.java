@@ -57,7 +57,8 @@ public class main {
             // 2. Ejecutar los algoritmos
             ParDePuntos resultado = Algoritmos.algoritmo_exhaustivo(puntos);
             ParDePuntos resultado2 = Algoritmos.algoritmo_busqueda_poda(puntos);
-
+            ParDePuntos resultado3 = Algoritmos.algoritmo_DIVIDE_Y_VENCERAS_MEJORADO(puntos) ; 
+            
             // 3. Mostrar resultados
             System.out.println("\nResultado búsqueda exhaustiva:");
             System.out.println("Par más cercano: " + resultado);
@@ -70,6 +71,12 @@ public class main {
             System.out.println("Distancia del par más cercano: " + resultado2.getDistancia());
             System.out.println("TIEMPO DE EJECUCION: " + resultado2.getTiempo_de_ejecucion() + " ms");
             System.out.println("NUMERO DE DISTANCIAS CALCULADAS: " + resultado2.getNum_distancias_calculadas());
+            
+            System.out.println("\nResultado Divide y Venceras:");
+            System.out.println("Par más cercano: " + resultado3);
+            System.out.println("Distancia del par mas cercano: " + resultado3.getDistancia());
+            System.out.println("TIEMPO DE EJECUCION: " + resultado3.getTiempo_de_ejecucion() + " ms");
+            System.out.println("NUMERO DE DISTANCIAS CALCULADAS: " + resultado3.getNum_distancias_calculadas()) ;
 
         } catch (Exception e) {
             System.err.println("Error al leer el dataset: " + e.getMessage());
