@@ -129,7 +129,15 @@ public class Algoritmos {
 	 * utilizada es: √[(x₁-x₂)² + (y₁-y₂)²]
 	 */
 	public static double distancia_euclidea(Punto p1, Punto p2) {
-		return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
+		double dx = p1.getX() - p2.getX();
+		double dy = p1.getY() - p2.getY();
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	public static double distancia_euclidea_cuadrada(Punto p1, Punto p2) {
+		double dx = p1.getX() - p2.getX();
+		double dy = p1.getY() - p2.getY();
+		return dx * dx + dy * dy; // Sin sqrt
 	}
 
 	/*
@@ -140,38 +148,43 @@ public class Algoritmos {
 	 * (n·(n-1)/2 comparaciones)
 	 */
 	public static ParDePuntos algoritmo_exhaustivo(List<Punto> puntos) {
-		if (puntos == null || puntos.size() < 2) {
-			throw new IllegalArgumentException("NO HAY PUNTOS SUFICIENTES\n");
-		}
+	    if (puntos == null || puntos.size() < 2) {
+	        throw new IllegalArgumentException("NO HAY PUNTOS SUFICIENTES\n");
+	    }
 
-		long START = System.nanoTime();
+	    long start = System.nanoTime();
 
-		double distanciaMinima = Double.MAX_VALUE;
-		Punto punto1 = null;
-		Punto punto2 = null;
-		int distanciasCalculadas = 0;
+	    double distanciaMinimaCuadrada = Double.MAX_VALUE;
+	    Punto punto1 = null;
+	    Punto punto2 = null;
+	    int distanciasCalculadas = 0;
 
-		// Comparar todos los pares de puntos posibles
-		for (int i = 0; i < puntos.size(); i++) {
-			for (int j = i + 1; j < puntos.size(); j++) {
-				double distancia = distancia_euclidea(puntos.get(i), puntos.get(j));
-				distanciasCalculadas++;
+	    for (int i = 0; i < puntos.size(); i++) {
+	        Punto a = puntos.get(i);
+	        for (int j = i + 1; j < puntos.size(); j++) {
+	            Punto b = puntos.get(j);
 
-				if (distancia < distanciaMinima) {
-					distanciaMinima = distancia;
-					punto1 = puntos.get(i);
-					punto2 = puntos.get(j);
-				}
-			}
-		}
+	            double distanciaCuadrada = distancia_euclidea_cuadrada(a, b);
+	            distanciasCalculadas++;
 
-		long END = System.nanoTime();
-		double tiempoEjecucion = (double) (END - START) / 1000000; // Convertir a milisegundos
+	            if (distanciaCuadrada < distanciaMinimaCuadrada) {
+	                distanciaMinimaCuadrada = distanciaCuadrada;
+	                punto1 = a;
+	                punto2 = b;
+	            }
+	        }
+	    }
 
-		ParDePuntos resultadoFinal = new ParDePuntos(punto1, punto2, distanciaMinima, distanciasCalculadas);
-		resultadoFinal.setTiempo_de_ejecucion(tiempoEjecucion);
+	    // Solo calcular sqrt una vez al final para mejorar el tiempo de ejecución.
+	    double distanciaMinima = Math.sqrt(distanciaMinimaCuadrada);
 
-		return resultadoFinal;
+	    long end = System.nanoTime();
+	    double tiempoEjecucion = (double) (end - start) / 1_000_000;
+
+	    ParDePuntos resultadoFinal = new ParDePuntos(punto1, punto2, distanciaMinima, distanciasCalculadas);
+	    resultadoFinal.setTiempo_de_ejecucion(tiempoEjecucion);
+
+	    return resultadoFinal;
 	}
 
 	/*
