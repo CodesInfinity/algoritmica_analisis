@@ -202,8 +202,7 @@ public class Algoritmos {
 			throw new IllegalArgumentException("NO HAY PUNTOS SUFICIENTES\n");
 		}
 
-		// Ordenar los puntos por coordenada X usando QuickSort (Collections.sort usa
-		// Timsort)
+		// Ordenar los puntos por coordenada X (Collections.sort usa Timsort)
 		puntos.sort(Comparator.comparingDouble(Punto::getX));
 
 		long START = System.nanoTime();
@@ -238,38 +237,131 @@ public class Algoritmos {
 
 		return resultadoFinal;
 	}
+	
+	// Divide y venceras
+	
+	public static ParDePuntos dyvNormal(List<Punto> ordenadosX) {
+	    int n = ordenadosX.size();
+		ordenadosX.sort(Comparator.comparingDouble(Punto::getX));
+	    
+	    // Caso base: usar el algoritmo exhaustivo
+	    if (n <= 3) {
+	        return algoritmo_exhaustivo(new ArrayList<>(ordenadosX));
+	    }
+	    
+	    int mid = n / 2;
+	    List<Punto> izquierda = new ArrayList<>(ordenadosX.subList(0, mid));
+	    List<Punto> derecha = new ArrayList<>(ordenadosX.subList(mid, n));
+	    double xm = derecha.get(0).getX();
+	    
+	    // Resolver recursivamente
+	    ParDePuntos solIzq = dyvNormal(izquierda);
+	    ParDePuntos solDer = dyvNormal(derecha);
+	    
+	    int distanciasCalculadas = solIzq.getNum_distancias_calculadas() + solDer.getNum_distancias_calculadas();
+	    
+	    double dIzq = solIzq.getDistancia();
+	    double dDer = solDer.getDistancia();
+	    double d = Math.min(dIzq, dDer);
+	    ParDePuntos mejor = (dIzq <= dDer) ? solIzq : solDer;
+	    
+	    // Crear franja (sin ordenar)
+	    ArrayList<Punto> bandaIzq = new ArrayList<>();
+	    ArrayList<Punto> bandaDer = new ArrayList<>();
+	    
+	    for (Punto p : izquierda)
+	        if (Math.abs(p.getX() - xm) < d)
+	            bandaIzq.add(p);
+	    
+	    for (Punto p : derecha)
+	        if (Math.abs(p.getX() - xm) < d)
+	            bandaDer.add(p);
+	    
+	    // Comparar solo puntos de las dos bandas
+	    for (Punto li : bandaIzq) {
+	        for (Punto rd : bandaDer) {
+	            // Corte por diferencia en X (ya sabemos que ambos están cerca del eje central)
+	            if (Math.abs(li.getX() - rd.getX()) >= d) 
+	                continue;
+	            
+	            // Corte adicional por Y (sin ordenar, pero aún útil)
+	            if (Math.abs(li.getY() - rd.getY()) >= d) 
+	                continue;
+	            
+	            double dist = distancia_euclidea(li, rd);
+	            distanciasCalculadas++;
+	            
+	            if (dist < d) {
+	                d = dist;
+	                mejor = new ParDePuntos(li, rd, dist, distanciasCalculadas);
+	            }
+	        }
+	    }
+	    
+	    mejor.setNum_distancias_calculadas(distanciasCalculadas);
+	    return mejor;
+	}
+	
+	public static ParDePuntos dyvMejorado(List<Punto> ordenados) {
+	    // Preordenar por Y una vez
+	    List<Punto> ordenadosY = new ArrayList<>(ordenados);
+	    ordenadosY.sort(Comparator.comparingDouble(Punto::getY));
+	    return dyvMejoradoRec(ordenados, ordenadosY);
+	}
 
-	public static ParDePuntos algoritmo_DIVIDE_Y_VENCERAS_MEJORADO(List<Punto> puntos) {
-		distancia_DYV_MEJORADO = 0;
-		long START = System.nanoTime();
+	private static ParDePuntos dyvMejoradoRec(List<Punto> ordenadosX, List<Punto> ordenadosY) {
+	    int n = ordenadosX.size();
 
-		// SE NECESITAN COMO MINIMO 2 PUNTOS
-		if (puntos == null || puntos.size() < 2) {
-			throw new IllegalArgumentException("NO HAY PUNTOS SUFICIENTES\n");
-		}
+	    if (n <= 3) {
+	        return algoritmo_exhaustivo(new ArrayList<>(ordenadosX));
+	    }
 
-		// ORDENAR LA LISTO DE PUNTOS TENIENDO EN CUENTA LA COORDENADA X
-		for (int i = 0; i < puntos.size(); i++) {
-			for (int j = 0; j < puntos.size() - 1; j++) {
-				if (puntos.get(j).getX() > puntos.get(j + 1).getX()) {
-					Punto aux = puntos.get(j + 1);
-					puntos.set(j + 1, puntos.get(j));
-					puntos.set(j, aux);
-				}
-			}
-		}
+	    int mid = n / 2;
+	    double xm = ordenadosX.get(mid).getX();
 
-		// EJECUTAR ALGORITMO RECURSIVO QUE DIVIDARA LA LISTA POR LA MITAD
-		ParDePuntos resultado_final = DyV_RECURSIVO(puntos);
+	    List<Punto> izquierdaX = ordenadosX.subList(0, mid);
+	    List<Punto> derechaX = ordenadosX.subList(mid, n);
 
-		long END = System.nanoTime();
-		double TIEMPO_DE_EJECUCION = (double) (END - START) / 1000000; // MILISEGUNDOS
+	    List<Punto> izquierdaY = new ArrayList<>();
+	    List<Punto> derechaY = new ArrayList<>();
 
-		resultado_final.setNum_distancias_calculadas(distancia_DYV_MEJORADO);
-		resultado_final.setTiempo_de_ejecucion(TIEMPO_DE_EJECUCION);
+	    for (Punto p : ordenadosY) {
+	        if (p.getX() <= xm)
+	            izquierdaY.add(p);
+	        else
+	            derechaY.add(p);
+	    }
 
-		return resultado_final;
+	    ParDePuntos solIzq = dyvMejoradoRec(izquierdaX, izquierdaY);
+	    ParDePuntos solDer = dyvMejoradoRec(derechaX, derechaY);
 
+	    int distancias = solIzq.getNum_distancias_calculadas() + solDer.getNum_distancias_calculadas();
+
+	    double d = Math.min(solIzq.getDistancia(), solDer.getDistancia());
+	    ParDePuntos mejor = (solIzq.getDistancia() <= solDer.getDistancia()) ? solIzq : solDer;
+
+	    // Construir franja directamente a partir de ordenadosY (ya ordenada por Y)
+	    List<Punto> franja = new ArrayList<>();
+	    for (Punto p : ordenadosY) {
+	        if (Math.abs(p.getX() - xm) < d) {
+	            franja.add(p);
+	        }
+	    }
+
+	    // Buscar en la franja (ya ordenada por Y)
+	    for (int i = 0; i < franja.size(); i++) {
+	        for (int j = i + 1; j < franja.size() && (franja.get(j).getY() - franja.get(i).getY()) < d; j++) {
+	            double dist = distancia_euclidea(franja.get(i), franja.get(j));
+	            distancias++;
+	            if (dist < d) {
+	                d = dist;
+	                mejor = new ParDePuntos(franja.get(i), franja.get(j), d, distancias);
+	            }
+	        }
+	    }
+
+	    mejor.setNum_distancias_calculadas(distancias);
+	    return mejor;
 	}
 
 }
