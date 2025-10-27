@@ -1,10 +1,12 @@
 # 📌 Práctica 1 - Algoritmos Exhaustivos y Divide y Vencerás  
 
-<img width="1394" height="888" alt="image" src="https://github.com/user-attachments/assets/10dbda09-d4d6-428d-a7ea-1b1d5770c85b" />
-
 ![Java](https://img.shields.io/badge/Java-17+-orange?style=for-the-badge&logo=java)
 ![Status](https://img.shields.io/badge/Status-En%20desarrollo-blue?style=for-the-badge)
 ![License](https://img.shields.io/badge/Licencia-Académica-green?style=for-the-badge)
+
+
+<img width="1394" height="888" alt="image" src="https://github.com/user-attachments/assets/10dbda09-d4d6-428d-a7ea-1b1d5770c85b" />
+
 
 ---
 
