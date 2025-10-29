@@ -12,58 +12,83 @@ import java.util.List;
 import java.text.DecimalFormat;
 
 /**
- * Versión final de la interfaz Swing
- * - Solo usa distribución uniforme
- * - Exporta CSV de resultados y comparaciones a src/comparaciones/
- * - Visualización gráfica de dataset y comparaciones
+ * Interfaz gráfica principal para el análisis de algoritmos del par de puntos más cercanos.
+ * 
+ * Características principales:
+ * - Gestión de datasets (carga y generación)
+ * - Ejecución de 4 algoritmos diferentes
+ * - Visualización gráfica de puntos y soluciones
+ * - Comparación de rendimiento entre algoritmos
+ * - Exportación de resultados a CSV
+ * 
+ * @version 1.0
  */
 public class MainGUI {
 
+    // Componentes principales de la interfaz
     private JFrame frame;
     private DatasetPanel datasetPanel;
     private JTable resultTable;
     private DefaultTableModel resultModel;
     private JTextArea logArea;
 
+    // Datos actuales
     private List<Punto> currentDataset = new ArrayList<>();
     private String currentDatasetName = "Ninguno";
     private File datasetsDirectory;
     private File comparacionesDirectory;
 
+    // Formateadores para números
     private final DecimalFormat distFmt = new DecimalFormat("#0.00000000");
     private final DecimalFormat timeFmt = new DecimalFormat("#0.0000");
 
-    // Colores de interfaz
+    // Esquema de colores de la interfaz
     private final Color PRIMARY_COLOR = new Color(41, 128, 185);
     private final Color SECONDARY_COLOR = new Color(52, 152, 219);
     private final Color ACCENT_COLOR = new Color(231, 76, 60);
     private final Color BACKGROUND_COLOR = new Color(236, 240, 241);
 
+    /**
+     * Método principal - punto de entrada de la aplicación
+     */
     public static void main(String[] args) {
+        // Ejecutar en el hilo de eventos de Swing
         SwingUtilities.invokeLater(() -> new MainGUI().init());
     }
 
+    /**
+     * Inicializa la aplicación y configura la interfaz principal
+     */
     private void init() {
+        // Configurar ventana principal
         frame = new JFrame("Análisis de Algoritmos - Par Más Cercano");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1400, 900);
         frame.setLayout(new BorderLayout(10, 10));
         frame.getContentPane().setBackground(BACKGROUND_COLOR);
 
+        // Inicializar directorios y interfaz
         initializeDirectories();
         setupGUI();
 
+        // Mostrar ventana centrada
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
+    /**
+     * Crea los directorios necesarios para la aplicación si no existen
+     */
     private void initializeDirectories() {
         File currentDir = new File(".");
         File srcDir = new File(currentDir, "src");
 
+        // Directorio para datasets (archivos TSP)
         File datasetsDir = new File(srcDir, "datasets");
+        // Directorio para resultados de comparaciones
         File comparacionesDir = new File(srcDir, "comparaciones");
 
+        // Crear directorios si no existen
         if (!datasetsDir.exists()) datasetsDir.mkdirs();
         if (!comparacionesDir.exists()) comparacionesDir.mkdirs();
 
@@ -71,13 +96,19 @@ public class MainGUI {
         comparacionesDirectory = comparacionesDir;
     }
 
+    /**
+     * Configura todos los componentes de la interfaz gráfica
+     */
     private void setupGUI() {
+        // Añadir panel de cabecera
         frame.add(createHeaderPanel(), BorderLayout.NORTH);
 
+        // Crear panel principal dividido
         JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         mainSplitPane.setDividerLocation(800);
         mainSplitPane.setResizeWeight(0.6);
 
+        // Crear paneles izquierdo y derecho
         JPanel leftPanel = createLeftPanel();
         JPanel rightPanel = createRightPanel();
 
@@ -90,29 +121,38 @@ public class MainGUI {
         frame.add(mainSplitPane, BorderLayout.CENTER);
     }
 
+    /**
+     * Crea el panel de cabecera con título e información del dataset
+     */
     private JPanel createHeaderPanel() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PRIMARY_COLOR);
         header.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
+        // Título principal
         JLabel title = new JLabel("Análisis de Algoritmos - Par Más Cercano");
         title.setFont(new Font("Segoe UI", Font.BOLD, 18));
         title.setForeground(Color.WHITE);
 
+        // Información del dataset actual
         JLabel datasetInfo = new JLabel("Dataset actual: " + currentDatasetName);
         datasetInfo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         datasetInfo.setForeground(Color.WHITE);
-        datasetInfo.setName("datasetInfo");
+        datasetInfo.setName("datasetInfo"); // Para poder localizarlo después
 
         header.add(title, BorderLayout.WEST);
         header.add(datasetInfo, BorderLayout.EAST);
         return header;
     }
 
+    /**
+     * Crea el panel izquierdo con controles y visualización
+     */
     private JPanel createLeftPanel() {
         JPanel leftPanel = new JPanel(new BorderLayout(10, 10));
         JPanel controlPanel = createControlPanel();
 
+        // Panel de visualización de puntos
         datasetPanel = new DatasetPanel();
         datasetPanel.setBorder(BorderFactory.createTitledBorder("Visualización del Dataset"));
 
@@ -121,15 +161,20 @@ public class MainGUI {
         return leftPanel;
     }
 
+    /**
+     * Crea el panel de controles con botones de gestión
+     */
     private JPanel createControlPanel() {
         JPanel controlPanel = new JPanel(new GridLayout(2, 1, 10, 10));
         controlPanel.setBorder(BorderFactory.createTitledBorder("Gestión de Datasets"));
 
+        // Panel de gestión de datasets
         JPanel datasetManagement = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         JButton loadBtn = createStyledButton("Cargar Dataset", PRIMARY_COLOR);
         JButton generateBtn = createStyledButton("Generar Dataset", SECONDARY_COLOR);
         JButton clearBtn = createStyledButton("Limpiar", new Color(149, 165, 166));
 
+        // Asignar listeners a los botones
         loadBtn.addActionListener(e -> onLoadDataset());
         generateBtn.addActionListener(e -> onGenerateDataset());
         clearBtn.addActionListener(e -> onClearAll());
@@ -138,6 +183,7 @@ public class MainGUI {
         datasetManagement.add(generateBtn);
         datasetManagement.add(clearBtn);
 
+        // Panel de ejecución de algoritmos
         JPanel algorithmPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         JButton runAllBtn = createStyledButton("Ejecutar Todos los Algoritmos", ACCENT_COLOR);
         JButton compareBtn = createStyledButton("Comparar Rendimiento", new Color(46, 204, 113));
@@ -153,6 +199,9 @@ public class MainGUI {
         return controlPanel;
     }
 
+    /**
+     * Crea un botón con estilo consistente
+     */
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
         button.setBackground(color);
@@ -163,6 +212,9 @@ public class MainGUI {
         return button;
     }
 
+    /**
+     * Crea el panel derecho con resultados y registro
+     */
     private JPanel createRightPanel() {
         JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
         JPanel resultsPanel = createResultsPanel();
@@ -173,15 +225,23 @@ public class MainGUI {
         return rightPanel;
     }
 
+    /**
+     * Crea el panel de resultados con tabla
+     */
     private JPanel createResultsPanel() {
         JPanel resultsPanel = new JPanel(new BorderLayout());
         resultsPanel.setBorder(BorderFactory.createTitledBorder("Resultados de los Algoritmos"));
 
+        // Configurar modelo de tabla
         String[] columnNames = {"Algoritmo", "Punto 1", "Punto 2", "Distancia", "Cálculos", "Tiempo (ms)"};
         resultModel = new DefaultTableModel(columnNames, 0) {
-            public boolean isCellEditable(int row, int column) { return false; }
+            @Override
+            public boolean isCellEditable(int row, int column) { 
+                return false; // Tabla de solo lectura
+            }
         };
 
+        // Crear tabla con los resultados
         resultTable = new JTable(resultModel);
         resultTable.setRowHeight(25);
         resultTable.getTableHeader().setBackground(PRIMARY_COLOR);
@@ -191,6 +251,7 @@ public class MainGUI {
         JScrollPane scrollPane = new JScrollPane(resultTable);
         resultsPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // Botón para exportar resultados
         JButton exportBtn = createStyledButton("Exportar CSV", new Color(243, 156, 18));
         exportBtn.addActionListener(e -> onExportCSV());
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -200,6 +261,9 @@ public class MainGUI {
         return resultsPanel;
     }
 
+    /**
+     * Crea el panel de registro de actividad
+     */
     private JPanel createLogPanel() {
         JPanel logPanel = new JPanel(new BorderLayout());
         logPanel.setBorder(BorderFactory.createTitledBorder("Registro de Actividad"));
@@ -213,16 +277,23 @@ public class MainGUI {
         return logPanel;
     }
 
-    /* ========================= EVENTOS ============================ */
+    /* ========================= MANEJADORES DE EVENTOS ============================ */
 
+    /**
+     * Maneja la carga de un dataset desde archivo TSP
+     */
     private void onLoadDataset() {
         JFileChooser fc = new JFileChooser(datasetsDirectory);
         fc.setFileFilter(new FileNameExtensionFilter("Archivos TSP", "tsp"));
+        
         if (fc.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
             try {
                 File f = fc.getSelectedFile();
+                // Cargar puntos desde archivo TSP
                 currentDataset = DatasetManager.cargarTSP(f.getAbsolutePath());
                 currentDatasetName = f.getName().replace(".tsp", "");
+                
+                // Actualizar visualización
                 datasetPanel.setPoints(currentDataset);
                 datasetPanel.repaint();
                 updateDatasetInfo();
@@ -233,7 +304,11 @@ public class MainGUI {
         }
     }
 
+    /**
+     * Maneja la generación de un dataset aleatorio
+     */
     private void onGenerateDataset() {
+        // Panel de diálogo para parámetros de generación
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         JTextField sizeField = new JTextField("1000");
         JTextField nameField = new JTextField("dataset_generado");
@@ -248,7 +323,10 @@ public class MainGUI {
         if (res == JOptionPane.OK_OPTION) {
             try {
                 int n = Integer.parseInt(sizeField.getText().trim());
-                if (n <= 0) { showError("Debe ingresar un número positivo."); return; }
+                if (n <= 0) { 
+                    showError("Debe ingresar un número positivo."); 
+                    return; 
+                }
                 generateDataset(n);
                 currentDatasetName = nameField.getText().trim();
                 updateDatasetInfo();
@@ -259,72 +337,126 @@ public class MainGUI {
         }
     }
 
+    /**
+     * Ejecuta todos los algoritmos sobre el dataset actual
+     */
     private void onRunAll() {
-        if (currentDataset.isEmpty()) { showWarning("Primero carga o genera un dataset."); return; }
-        resultModel.setRowCount(0);
+        if (currentDataset.isEmpty()) { 
+            showWarning("Primero carga o genera un dataset."); 
+            return; 
+        }
+        
+        resultModel.setRowCount(0); // Limpiar resultados anteriores
+        
         try {
+            // Ejecutar algoritmo exhaustivo
             ParDePuntos ex = Algoritmos.algoritmo_exhaustivo(deepCopy(currentDataset));
             addResult("Exhaustivo", ex);
+            
+            // Ejecutar algoritmo con poda (requiere ordenación por X)
             List<Punto> sorted = deepCopy(currentDataset);
             sortByX(sorted);
             addResult("Exhaustivo con Poda", Algoritmos.algoritmo_busqueda_poda(sorted));
+            
+            // Ejecutar Divide y Vencerás normal
             List<Punto> sorted2 = deepCopy(currentDataset);
             sortByX(sorted2);
             addResult("Divide y Vencerás", Algoritmos.dyvNormal(sorted2));
+            
+            // Ejecutar Divide y Vencerás mejorado
             List<Punto> sorted3 = deepCopy(currentDataset);
             sortByX(sorted3);
             addResult("Divide y Vencerás Mejorado", Algoritmos.dyvMejorado(sorted3));
+            
+            // Mostrar solución en el panel de visualización
             datasetPanel.setSolution(ex.getP1(), ex.getP2());
             datasetPanel.repaint();
-        } catch (Exception e) { showError("Error ejecutando algoritmos: " + e.getMessage()); }
+        } catch (Exception e) { 
+            showError("Error ejecutando algoritmos: " + e.getMessage()); 
+        }
     }
 
+    /**
+     * Inicia la comparación de rendimiento entre algoritmos
+     */
     private void onComparePerformance() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         JTextField sizesField = new JTextField("100,500,1000,2000");
         JTextField repsField = new JTextField("3");
-        panel.add(new JLabel("Tamaños (separados por comas):")); panel.add(sizesField);
-        panel.add(new JLabel("Repeticiones:")); panel.add(repsField);
+        panel.add(new JLabel("Tamaños (separados por comas):")); 
+        panel.add(sizesField);
+        panel.add(new JLabel("Repeticiones:")); 
+        panel.add(repsField);
 
         int res = JOptionPane.showConfirmDialog(frame, panel, "Comparar Rendimiento",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (res != JOptionPane.OK_OPTION) return;
 
         try {
+            // Parsear tamaños de datasets
             List<Integer> tallas = new ArrayList<>();
-            for (String s : sizesField.getText().split(",")) tallas.add(Integer.parseInt(s.trim()));
+            for (String s : sizesField.getText().split(",")) 
+                tallas.add(Integer.parseInt(s.trim()));
+            
             int reps = Integer.parseInt(repsField.getText().trim());
             runPerformanceComparison(tallas, reps);
-        } catch (Exception e) { showError("Entrada inválida: " + e.getMessage()); }
+        } catch (Exception e) { 
+            showError("Entrada inválida: " + e.getMessage()); 
+        }
     }
 
+    /**
+     * Ejecuta la comparación de rendimiento con múltiples tamaños y repeticiones
+     */
     private void runPerformanceComparison(List<Integer> tallas, int reps) {
+        // Estructura para almacenar tiempos: Algoritmo -> Lista de tiempos por tamaño
         Map<String, List<Double>> tiempos = new LinkedHashMap<>();
         String[] algos = {"Exhaustivo", "Exhaustivo con Poda", "Divide y Vencerás", "Divide y Vencerás Mejorado"};
-        for (String a : algos) tiempos.put(a, new ArrayList<>());
+        
+        // Inicializar listas de tiempos
+        for (String a : algos) 
+            tiempos.put(a, new ArrayList<>());
 
+        // Probar cada tamaño de dataset
         for (int n : tallas) {
             log("Procesando tamaño " + n);
-            double[] sum = new double[4];
+            double[] sum = new double[4]; // Sumatorios de tiempos para cada algoritmo
+            
+            // Repetir cada prueba para mayor precisión
             for (int r = 0; r < reps; r++) {
                 generateDataset(n);
                 List<Punto> d = deepCopy(currentDataset);
+                
+                // Medir tiempo de cada algoritmo
                 sum[0] += Algoritmos.algoritmo_exhaustivo(deepCopy(d)).getTiempo_de_ejecucion();
-                List<Punto> t = deepCopy(d); sortByX(t);
+                
+                List<Punto> t = deepCopy(d); 
+                sortByX(t);
                 sum[1] += Algoritmos.algoritmo_busqueda_poda(t).getTiempo_de_ejecucion();
-                t = deepCopy(d); sortByX(t);
+                
+                t = deepCopy(d); 
+                sortByX(t);
                 sum[2] += Algoritmos.dyvNormal(t).getTiempo_de_ejecucion();
-                t = deepCopy(d); sortByX(t);
+                
+                t = deepCopy(d); 
+                sortByX(t);
                 sum[3] += Algoritmos.dyvMejorado(t).getTiempo_de_ejecucion();
             }
-            for (int i = 0; i < 4; i++) tiempos.get(algos[i]).add(sum[i] / reps);
+            
+            // Calcular promedios y almacenar
+            for (int i = 0; i < 4; i++) 
+                tiempos.get(algos[i]).add(sum[i] / reps);
         }
 
+        // Exportar resultados y mostrar gráfica
         exportComparisonToCSV(tallas, tiempos);
         showComparisonChart(tallas, tiempos);
         log("✓ Comparación completada y CSV guardado en /src/comparaciones/");
     }
 
+    /**
+     * Exporta los resultados actuales a archivo CSV
+     */
     private void onExportCSV() {
         if (resultModel.getRowCount() == 0) {
             showWarning("No hay resultados para exportar.");
@@ -333,11 +465,14 @@ public class MainGUI {
         try {
             File out = new File(comparacionesDirectory, "Resultados_" + currentDatasetName + ".csv");
             try (PrintWriter pw = new PrintWriter(out)) {
+                // Escribir cabeceras
                 for (int i = 0; i < resultModel.getColumnCount(); i++) {
                     pw.print(resultModel.getColumnName(i));
                     if (i < resultModel.getColumnCount() - 1) pw.print(",");
                 }
                 pw.println();
+                
+                // Escribir datos
                 for (int r = 0; r < resultModel.getRowCount(); r++) {
                     for (int c = 0; c < resultModel.getColumnCount(); c++) {
                         pw.print(resultModel.getValueAt(r, c));
@@ -347,19 +482,25 @@ public class MainGUI {
                 }
             }
             JOptionPane.showMessageDialog(frame, "CSV guardado en: " + out.getAbsolutePath());
-        } catch (Exception e) { showError("Error exportando CSV: " + e.getMessage()); }
+        } catch (Exception e) { 
+            showError("Error exportando CSV: " + e.getMessage()); 
+        }
     }
 
+    /**
+     * Exporta los resultados de comparación a archivo CSV
+     */
     private void exportComparisonToCSV(List<Integer> tallas, Map<String, List<Double>> tiempos) {
         try {
             // Crear carpeta si no existe
-            if (!comparacionesDirectory.exists()) comparacionesDirectory.mkdirs();
+            if (!comparacionesDirectory.exists()) 
+                comparacionesDirectory.mkdirs();
 
-            // Archivo de salida con nombre único
+            // Archivo de salida con nombre único (timestamp)
             File f = new File(comparacionesDirectory, "Comparacion_" + System.currentTimeMillis() + ".csv");
 
             try (PrintWriter pw = new PrintWriter(f, "UTF-8")) {
-                // Encabezado ordenado
+                // Encabezado ordenado (separador punto y coma para Excel)
                 pw.println("Tamano;Exhaustivo;Exhaustivo con Poda;Divide y Venceras;Divide y Venceras Mejorado");
 
                 // Escribir filas con punto decimal (formato compatible con Excel)
@@ -367,6 +508,7 @@ public class MainGUI {
                 for (int i = 0; i < numFilas; i++) {
                     StringBuilder line = new StringBuilder();
                     line.append(tallas.get(i)); // Tamaño
+                    
                     for (String algoritmo : Arrays.asList(
                             "Exhaustivo", "Exhaustivo con Poda", "Divide y Vencerás", "Divide y Vencerás Mejorado")) {
                         List<Double> tiemposAlgo = tiempos.get(algoritmo);
@@ -389,6 +531,9 @@ public class MainGUI {
         }
     }
 
+    /**
+     * Limpia todos los datos y resultados actuales
+     */
     private void onClearAll() {
         currentDataset.clear();
         datasetPanel.setPoints(new ArrayList<>());
@@ -399,71 +544,125 @@ public class MainGUI {
         datasetPanel.repaint();
     }
 
-    /* ======================= UTILIDADES ======================== */
+    /* ======================= MÉTODOS UTILITARIOS ======================== */
 
+    /**
+     * Genera un dataset aleatorio con distribución uniforme
+     */
     private void generateDataset(int n) {
         List<Punto> pts = new ArrayList<>();
         Random rnd = new Random();
+        
+        // Generar n puntos con coordenadas aleatorias en [0, 1000]
         for (int i = 0; i < n; i++)
             pts.add(new Punto(i + 1, rnd.nextDouble() * 1000, rnd.nextDouble() * 1000));
+        
         currentDataset = pts;
         datasetPanel.setPoints(pts);
         datasetPanel.repaint();
     }
 
+    /**
+     * Actualiza la información del dataset en la interfaz
+     */
     private void updateDatasetInfo() {
+        // Buscar y actualizar la etiqueta de información del dataset
         for (Component c : frame.getContentPane().getComponents())
-            if (c instanceof JPanel) for (Component cc : ((JPanel)c).getComponents())
-                if (cc instanceof JLabel && "datasetInfo".equals(cc.getName()))
-                    ((JLabel)cc).setText("Dataset actual: " + currentDatasetName + " (" + currentDataset.size() + " puntos)");
+            if (c instanceof JPanel) 
+                for (Component cc : ((JPanel)c).getComponents())
+                    if (cc instanceof JLabel && "datasetInfo".equals(cc.getName()))
+                        ((JLabel)cc).setText("Dataset actual: " + currentDatasetName + " (" + currentDataset.size() + " puntos)");
     }
 
+    /**
+     * Crea una copia profunda de una lista de puntos
+     */
     private List<Punto> deepCopy(List<Punto> list) {
         List<Punto> copy = new ArrayList<>();
-        for (Punto p : list) copy.add(new Punto(p.getId(), p.getX(), p.getY()));
+        for (Punto p : list) 
+            copy.add(new Punto(p.getId(), p.getX(), p.getY()));
         return copy;
     }
 
-    private void sortByX(List<Punto> list) { list.sort(Comparator.comparingDouble(Punto::getX)); }
+    /**
+     * Ordena una lista de puntos por coordenada X
+     */
+    private void sortByX(List<Punto> list) { 
+        list.sort(Comparator.comparingDouble(Punto::getX)); 
+    }
 
+    /**
+     * Añade un resultado a la tabla
+     */
     private void addResult(String algo, ParDePuntos r) {
         resultModel.addRow(new Object[]{
-                algo, r.getP1().getId(), r.getP2().getId(),
+                algo, 
+                r.getP1().getId(), 
+                r.getP2().getId(),
                 distFmt.format(r.getDistancia()),
                 r.getNum_distancias_calculadas(),
                 timeFmt.format(r.getTiempo_de_ejecucion())
         });
     }
 
-    private void log(String msg) { logArea.append("[" + new Date() + "] " + msg + "\n"); }
-    private void showError(String msg) { JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE); }
-    private void showWarning(String msg) { JOptionPane.showMessageDialog(frame, msg, "Atención", JOptionPane.WARNING_MESSAGE); }
+    /**
+     * Añade un mensaje al registro de actividad
+     */
+    private void log(String msg) { 
+        logArea.append("[" + new Date() + "] " + msg + "\n"); 
+    }
+    
+    /**
+     * Muestra un diálogo de error
+     */
+    private void showError(String msg) { 
+        JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE); 
+    }
+    
+    /**
+     * Muestra un diálogo de advertencia
+     */
+    private void showWarning(String msg) { 
+        JOptionPane.showMessageDialog(frame, msg, "Atención", JOptionPane.WARNING_MESSAGE); 
+    }
 
     /* ======================= CLASES INTERNAS ======================== */
 
+    /**
+     * Panel personalizado para visualizar puntos y la solución
+     */
     private static class DatasetPanel extends JPanel {
         private List<Punto> points = new ArrayList<>();
-        private Punto p1, p2;
+        private Punto p1, p2; // Puntos de la solución
 
         void setPoints(List<Punto> pts) { this.points = pts; }
         void setSolution(Punto a, Punto b) { this.p1 = a; this.p2 = b; }
 
+        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (points == null || points.isEmpty()) return;
+            
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
             int w = getWidth(), h = getHeight(), pad = 20;
+            
+            // Calcular rangos para escalado
             double minX = points.stream().mapToDouble(Punto::getX).min().getAsDouble();
             double maxX = points.stream().mapToDouble(Punto::getX).max().getAsDouble();
             double minY = points.stream().mapToDouble(Punto::getY).min().getAsDouble();
             double maxY = points.stream().mapToDouble(Punto::getY).max().getAsDouble();
+            
+            // Dibujar puntos
             g2.setColor(new Color(52, 152, 219));
             for (Punto p : points) {
                 int x = pad + (int) ((p.getX() - minX) / (maxX - minX) * (w - 2 * pad));
                 int y = h - pad - (int) ((p.getY() - minY) / (maxY - minY) * (h - 2 * pad));
                 g2.fillOval(x - 2, y - 2, 4, 4);
             }
+            
+            // Dibujar línea entre los puntos más cercanos si existe solución
             if (p1 != null && p2 != null) {
                 g2.setColor(Color.RED);
                 int x1 = pad + (int) ((p1.getX() - minX) / (maxX - minX) * (w - 2 * pad));
@@ -476,6 +675,9 @@ public class MainGUI {
         }
     }
 
+    /**
+     * Muestra una ventana con la gráfica de comparación de rendimiento
+     */
     private void showComparisonChart(List<Integer> tallas, Map<String, List<Double>> tiempos) {
         JFrame chart = new JFrame("Comparación de Rendimiento");
         chart.setSize(800, 500);
@@ -484,32 +686,62 @@ public class MainGUI {
         chart.setVisible(true);
     }
 
+    /**
+     * Panel personalizado para dibujar gráficas de comparación
+     */
     private static class ChartPanel extends JPanel {
         private final List<Integer> tallas;
         private final Map<String, List<Double>> tiempos;
-        ChartPanel(List<Integer> t, Map<String, List<Double>> ti) { this.tallas = t; this.tiempos = ti; }
+        
+        ChartPanel(List<Integer> t, Map<String, List<Double>> ti) { 
+            this.tallas = t; 
+            this.tiempos = ti; 
+        }
+        
+        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
             int w = getWidth(), h = getHeight(), pad = 60;
+            
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            double maxT = tiempos.values().stream().flatMap(List::stream).mapToDouble(v -> v).max().orElse(1);
+            
+            // Calcular tiempo máximo para escalado
+            double maxT = tiempos.values().stream()
+                    .flatMap(List::stream)
+                    .mapToDouble(v -> v)
+                    .max().orElse(1);
+            
+            // Dibujar ejes
             g2.setColor(Color.BLACK);
-            g2.drawLine(pad, h - pad, w - pad, h - pad);
-            g2.drawLine(pad, h - pad, pad, pad);
+            g2.drawLine(pad, h - pad, w - pad, h - pad); // Eje X
+            g2.drawLine(pad, h - pad, pad, pad);         // Eje Y
+            
+            // Colores para cada algoritmo
             Color[] colors = {Color.RED, Color.BLUE, new Color(39, 174, 96), new Color(243, 156, 18)};
             int ci = 0;
+            
+            // Dibujar líneas para cada algoritmo
             for (String key : tiempos.keySet()) {
                 g2.setColor(colors[ci++ % colors.length]);
                 List<Double> vals = tiempos.get(key);
                 int prevX = -1, prevY = -1;
+                
+                // Dibujar puntos y conectar con líneas
                 for (int i = 0; i < tallas.size(); i++) {
-                    int x = pad + (int) ((tallas.get(i) - tallas.get(0)) / (double) (tallas.get(tallas.size() - 1) - tallas.get(0)) * (w - 2 * pad));
+                    int x = pad + (int) ((tallas.get(i) - tallas.get(0)) / 
+                            (double) (tallas.get(tallas.size() - 1) - tallas.get(0)) * (w - 2 * pad));
                     int y = h - pad - (int) ((vals.get(i) / maxT) * (h - 2 * pad));
+                    
                     g2.fillOval(x - 3, y - 3, 6, 6);
-                    if (prevX != -1) g2.drawLine(prevX, prevY, x, y);
-                    prevX = x; prevY = y;
+                    if (prevX != -1) 
+                        g2.drawLine(prevX, prevY, x, y);
+                    
+                    prevX = x; 
+                    prevY = y;
                 }
+                
+                // Leyenda
                 g2.drawString(key, w - 180, pad + ci * 20);
             }
         }

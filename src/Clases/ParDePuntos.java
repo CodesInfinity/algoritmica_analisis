@@ -27,12 +27,6 @@ public class ParDePuntos {
         return distancia;
     }
 
-    /*@Override
-    public String toString() {
-        return p1 + " <-> " + p2 + " Distancia: " + String.format("%.8f", distancia);
-    }
-     */
-
     @Override
     public String toString() {
         return "PAR_DE_PUNTOS{ " +
